@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Simulation Report — {{ symbol }}</title>
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --surface: #111827;
+            --card: #1a2236;
+            --border: #2d3a52;
+            --accent: #3b82f6;
+            --accent2: #10b981;
+            --accent3: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            padding: 32px;
+            line-height: 1.6;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .meta { color: var(--muted); font-size: 13px; text-align: right; }
+        .section { margin-bottom: 40px; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .metric-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .metric-card .label {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+        .metric-card .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .metric-card .unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            background: var(--surface);
+            color: var(--muted);
+            font-weight: 600;
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+        td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        tr:hover td { background: rgba(59, 130, 246, 0.05); }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-fill { background: rgba(16,185,129,0.2); color: #10b981; }
+        .badge-partial { background: rgba(245,158,11,0.2); color: #f59e0b; }
+        .badge-cancel { background: rgba(239,68,68,0.2); color: #ef4444; }
+        .badge-new { background: rgba(59,130,246,0.2); color: #3b82f6; }
+        .badge-reject { background: rgba(239,68,68,0.3); color: #ef4444; }
+        .badge-buy { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-sell { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .footer {
+            margin-top: 48px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+        .latency-table td { font-family: monospace; }
+        .highlight { color: var(--accent2); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Exchange Simulation Report</h1>
+            <p style="color: var(--muted); margin-top: 4px;">Symbol: <strong style="color:var(--text)">{{ symbol }}</strong></p>
+        </div>
+        <div class="meta">
+            <div>Generated: {{ generated_at }}</div>
+            <div>Engine: High-Performance Electronic Exchange Simulator</div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="section">
+        <div class="section-title">Execution Summary</div>
+        <div class="grid">
+            <div class="metric-card">
+                <div class="label">Total Orders</div>
+                <div class="value">{{ summary.total_orders | format_int }}</div>
+                <div class="unit">submitted</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Trades</div>
+                <div class="value" style="color:var(--accent2)">{{ summary.total_trades | format_int }}</div>
+                <div class="unit">executions</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Volume</div>
+                <div class="value">{{ summary.total_volume | format_int }}</div>
+                <div class="unit">shares</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Total Notional</div>
+                <div class="value" style="color:var(--accent3)">${{ summary.total_notional | format_float }}</div>
+                <div class="unit">USD</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">VWAP</div>
+                <div class="value" style="color:var(--accent3)">${{ summary.vwap | format_float }}</div>
+                <div class="unit">volume-weighted avg price</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Fill Rate</div>
+                <div class="value">{{ (summary.fill_rate * 100) | round(1) }}%</div>
+                <div class="unit">orders filled</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Rejections</div>
+                <div class="value" style="color:var(--danger)">{{ summary.rejected_orders }}</div>
+                <div class="unit">rejected orders</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Cancellations</div>
+                <div class="value" style="color:var(--accent3)">{{ summary.cancelled_orders }}</div>
+                <div class="unit">cancelled orders</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latency Stats -->
+    {% if latency %}
+    <div class="section">
+        <div class="section-title">Execution Latency</div>
+        <div class="grid">
+            <div class="metric-card">
+                <div class="label">Median (P50)</div>
+                <div class="value">{{ latency.p50_us }}</div>
+                <div class="unit">microseconds</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">P95</div>
+                <div class="value">{{ latency.p95_us }}</div>
+                <div class="unit">microseconds</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">P99</div>
+                <div class="value" style="color:var(--accent3)">{{ latency.p99_us }}</div>
+                <div class="unit">microseconds</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Mean</div>
+                <div class="value">{{ latency.mean_us }}</div>
+                <div class="unit">microseconds</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Top Trades -->
+    {% if trades %}
+    <div class="section">
+        <div class="section-title">Recent Trades (Last {{ trades | length }})</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Notional</th>
+                    <th>Trade ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trades %}
+                <tr>
+                    <td>{{ t.executed_at }}</td>
+                    <td class="highlight">${{ t.price }}</td>
+                    <td>{{ t.quantity }}</td>
+                    <td>${{ (t.price * t.quantity) | round(2) }}</td>
+                    <td style="color:var(--muted); font-size:11px">{{ t.trade_id[:16] }}…</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Market Quality -->
+    {% if market_quality %}
+    <div class="section">
+        <div class="section-title">Market Quality</div>
+        <div class="grid">
+            {% if market_quality.spread is not none %}
+            <div class="metric-card">
+                <div class="label">Bid-Ask Spread</div>
+                <div class="value">{{ market_quality.spread | format_float }}</div>
+                <div class="unit">current spread</div>
+            </div>
+            {% endif %}
+            {% if market_quality.mid_price is not none %}
+            <div class="metric-card">
+                <div class="label">Mid Price</div>
+                <div class="value">${{ market_quality.mid_price | format_float }}</div>
+                <div class="unit">current mid</div>
+            </div>
+            {% endif %}
+            {% if market_quality.imbalance is not none %}
+            <div class="metric-card">
+                <div class="label">Book Imbalance</div>
+                <div class="value">{{ (market_quality.imbalance * 100) | round(1) }}%</div>
+                <div class="unit">bid vs ask pressure</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        High-Performance Electronic Exchange Simulator &copy; 2025 &mdash;
+        Generated by the analytics and reporting engine.
+    </div>
+</body>
+</html>
