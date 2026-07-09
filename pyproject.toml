@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "electronic-exchange-simulator"
+version = "1.0.0"
+description = "Production-grade electronic exchange simulator with price-time priority matching"
+authors = [{ name = "Shardul", email = "shardul@example.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["exchange", "matching-engine", "order-book", "market-microstructure", "fintech"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Office/Business :: Financial",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "sortedcontainers>=2.4.0",
+    "plotly>=5.18.0",
+    "dash>=2.14.0",
+    "dash-bootstrap-components>=1.5.0",
+    "jinja2>=3.1.0",
+    "pandas>=2.1.0",
+    "numpy>=1.26.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pyyaml>=6.0.1",
+    "rich>=13.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0",
+    "isort>=5.12",
+    "mypy>=1.6",
+    "flake8>=6.1",
+]
+
+[project.scripts]
+exchange-sim = "exchange.cli:main"
+exchange-dashboard = "exchange.dashboard.app:run_server"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["exchange*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--tb=short -v"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
